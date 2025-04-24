@@ -4,7 +4,6 @@ import com.lucius.springaitest.Configuration.ChatMemoryImpl;
 import com.lucius.springaitest.Constant.RedisConstant;
 import com.lucius.springaitest.Service.ChatService;
 import com.lucius.springaitest.VO.MessageVO;
-import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -43,7 +42,7 @@ public class ChatServiceImpl implements ChatService {
     public List<MessageVO> selectMessage(String type, String chatId) {
         List<MessageVO> list = new ArrayList<>();
         List<Message> list1;
-        list1=chatMemoryImpl.get(RedisConstant.REDIS_MEMORY_ID+chatId,100);
+        list1=chatMemoryImpl.get(chatId,100);
         for (Message message : list1) {
             list.add(new MessageVO(message));
         }

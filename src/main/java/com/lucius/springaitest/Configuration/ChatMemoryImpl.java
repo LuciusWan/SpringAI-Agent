@@ -58,7 +58,7 @@ public class ChatMemoryImpl implements ChatMemory {
             messages.add(new UserMessage(msg));
             return messages;
         }*/
-        Set<String> range = stringRedisTemplate.opsForZSet().range(conversationId, 0, 9);
+        Set<String> range = stringRedisTemplate.opsForZSet().range(RedisConstant.REDIS_MEMORY_ID+conversationId, 0, 9);
         if(range==null){
             return null;
         }else{

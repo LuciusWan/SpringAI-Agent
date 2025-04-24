@@ -28,7 +28,7 @@ public class AIConfiguration {
     @Bean
     public ChatClient Alibaba(OpenAiChatModel moddle, ChatMemory chatMemory) {
         return ChatClient.builder(moddle)
-                .defaultSystem(AIConstant.MAIN).defaultAdvisors(
+                .defaultSystem(AIConstant.DEFAULT).defaultAdvisors(
                         new SimpleLoggerAdvisor(),
                         new MessageChatMemoryAdvisor(chatMemory)
                 ).build();

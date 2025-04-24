@@ -22,7 +22,7 @@ public class AIController {
     private ChatClient chatClient2;
     @Autowired
     private ChatService chatService;
-    @RequestMapping(value = "/chat",produces = "text/html;charset=utf-8")
+    @RequestMapping(value = "/chat2",produces = "text/html;charset=utf-8")
     public Flux<String> chat(String prompt,String chatId) {
         chatService.saveChatId(chatId,"chat");
         return chatClient.prompt()
@@ -31,7 +31,7 @@ public class AIController {
                 .stream()
                 .content();
     }
-    @RequestMapping(value = "/chat2",produces = "text/html;charset=utf-8")
+    @RequestMapping(value = "/chat",produces = "text/html;charset=utf-8")
     public Flux<String> chatAlibaba(String prompt,String chatId) {
         System.out.println(chatId);
         return chatClient2.prompt()
