@@ -1,22 +1,16 @@
 package com.lucius.springaitest.Configuration;
-
 import com.lucius.springaitest.Constant.RedisConstant;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.content.Content;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Component
 public class ChatMemoryImpl implements ChatMemory {
@@ -64,17 +58,38 @@ public class ChatMemoryImpl implements ChatMemory {
             messages.add(new UserMessage(msg));
             return messages;
         }*/
-        Set<String> range = stringRedisTemplate.opsForZSet().range(RedisConstant.REDIS_MEMORY_ID + conversationId, 0, 9);
+        Set<String> range = stringRedisTemplate.opsForZSet().range(conversationId, 0, 9);
         if(range==null){
             return null;
         }else{
-            System.out.println(range);
             List<Message> messages=new ArrayList<>();
             for (String s : range) {
                 if(s.contains("AssistantMessage")){
-                    messages.add(new AssistantMessage(s));
+                    int startIndex = s.indexOf("textContent=") + "textContent=".length();
+                    // 查找 textContent 的结束位置
+                    int endIndex = s.indexOf(", metadata=", startIndex);
+
+                    if (startIndex != -1 && endIndex != -1) {
+                        String textContent = s.substring(startIndex, endIndex);
+                        messages.add(new AssistantMessage(textContent));
+                    } else {
+                        System.out.println("textContent not found.");
+                    }
+
                 }else if(s.contains("UserMessage")){
-                    messages.add(new UserMessage(s));
+                    // 查找 content 的起始位置
+                    int startIndex = s.indexOf("content='") + "content='".length();
+                    // 查找 content 的结束位置
+                    int endIndex = s.indexOf("'", startIndex);
+
+                    if (startIndex != -1 && endIndex != -1) {
+                        String content = s.substring(startIndex, endIndex);
+                        messages.add(new UserMessage(content));
+
+                    } else {
+                        System.out.println("content not found.");
+                    }
+
                 }
             }
             return messages;
