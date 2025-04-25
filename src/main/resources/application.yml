@@ -4,7 +4,7 @@ spring:
   ai:
     openai:
       base-url: https://dashscope.aliyuncs.com/compatible-mode
-      api-key: sk-f05ef9cd88fd436ea4be2b2e3edae7f4
+      api-key: ${OPENAI_API_KEY}
       chat:
         options:
           model: qwen-max-latest
@@ -31,5 +31,5 @@ server:
   port: 8080
 logging:
   level:
-    org.springframework.ai.chat.client.advisor: debug
+    org.springframework.ai: debug
     com.lucius.springaitest: debug

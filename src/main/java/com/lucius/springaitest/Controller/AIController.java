@@ -1,4 +1,5 @@
 package com.lucius.springaitest.Controller;
+import com.lucius.springaitest.Constant.AIConstant;
 import com.lucius.springaitest.Service.ChatService;
 import com.lucius.springaitest.VO.MessageVO;
 import jakarta.annotation.Resource;
@@ -25,7 +26,7 @@ public class AIController {
     @RequestMapping(value = "/chat2",produces = "text/html;charset=utf-8")
     public Flux<String> chat(String prompt,String chatId) {
         chatService.saveChatId(chatId,"chat");
-        return chatClient.prompt()
+        return chatClient.prompt(AIConstant.NekoPrompt)
                 .user(prompt)
                 .advisors(a->a.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY,chatId))
                 .stream()
@@ -33,8 +34,8 @@ public class AIController {
     }
     @RequestMapping(value = "/chat",produces = "text/html;charset=utf-8")
     public Flux<String> chatAlibaba(String prompt,String chatId) {
-        System.out.println(chatId);
-        return chatClient2.prompt()
+        chatService.saveChatId(chatId,"chat");
+        return chatClient2.prompt(AIConstant.COMPUTER)
                 .user(prompt)
                 .advisors(a->a.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY,chatId))
                 .stream()
@@ -47,5 +48,14 @@ public class AIController {
     @GetMapping("/history/{type}/{chatId}")
     public List<MessageVO> history(@PathVariable String type, @PathVariable String chatId) {
         return chatService.selectMessage(type,chatId);
+    }
+    @RequestMapping(value = "/game",produces = "text/html;charset=utf-8")
+    public Flux<String> chatGame(String prompt,String chatId) {
+        //chatService.saveChatId(chatId,"chat");
+        return chatClient2.prompt(AIConstant.GIRLFRIEND)
+                .user(prompt)
+                .advisors(a->a.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY,chatId))
+                .stream()
+                .content();
     }
 }

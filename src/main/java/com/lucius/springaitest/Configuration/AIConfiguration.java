@@ -1,20 +1,22 @@
 package com.lucius.springaitest.Configuration;
 
 import com.lucius.springaitest.Constant.AIConstant;
+import com.lucius.springaitest.Tools.CourseTools;
+import com.lucius.springaitest.VO.Course;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AIConfiguration {
+    @Autowired
+    private CourseTools courseTools;
     @Autowired
     private ChatMemory chatMemory;
     @Bean
@@ -33,8 +35,16 @@ public class AIConfiguration {
                         new MessageChatMemoryAdvisor(chatMemory)
                 ).build();
     }
-    /*@Bean
-    public ChatClient MoonshotModel() {
-        return ChatClient.builder(moonshotChatModel).defaultSystem("假如你是特朗普,模仿他的语气说话").build();
-    }*/
+    @Bean
+    public ChatClient serviceChatClient(
+            OpenAiChatModel model,
+            ChatMemory chatMemory) {
+        return ChatClient.builder(model)
+                .defaultSystem(AIConstant.SERVER)
+                .defaultAdvisors(
+                        new MessageChatMemoryAdvisor(chatMemory),
+                        new SimpleLoggerAdvisor())
+                .defaultTools(courseTools)
+                .build();
+    }
 }

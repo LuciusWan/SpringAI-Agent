@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -42,9 +43,9 @@ public class ChatMemoryImpl implements ChatMemory {
         }
         stringRedisTemplate.opsForZSet().add(RedisConstant.REDIS_MEMORY_ID+conversationId,sb.toString(),start);
         Long size=stringRedisTemplate.opsForZSet().size(RedisConstant.REDIS_MEMORY_ID+conversationId);
-        if(size!=null&&size>11){
+        /*if(size!=null&&size>11){
             stringRedisTemplate.opsForZSet().removeRange(RedisConstant.REDIS_MEMORY_ID+conversationId,0,1);
-        }
+        }*/
         stringRedisTemplate.boundZSetOps(RedisConstant.REDIS_MEMORY_ID+conversationId).expire(12, TimeUnit.HOURS);
     }
 
@@ -58,7 +59,11 @@ public class ChatMemoryImpl implements ChatMemory {
             messages.add(new UserMessage(msg));
             return messages;
         }*/
-        Set<String> range = stringRedisTemplate.opsForZSet().range(RedisConstant.REDIS_MEMORY_ID+conversationId, 0, 9);
+        Long size=stringRedisTemplate.opsForZSet().size(RedisConstant.REDIS_MEMORY_ID+conversationId);
+        Set<String> range=new HashSet<>();
+        if(size!=null){
+            range = stringRedisTemplate.opsForZSet().range(RedisConstant.REDIS_MEMORY_ID+conversationId, 0, size-1L);
+        }
         if(range==null){
             return null;
         }else{
