@@ -19,10 +19,22 @@ import java.util.List;
 public class AIController {
     @Resource(name="chat")
     private ChatClient chatClient;
-    @Resource(name = "Alibaba")
-    private ChatClient chatClient2;
+    @Autowired
+    private ChatClient GirlfriendSadChatClient;
     @Autowired
     private ChatService chatService;
+    @Autowired
+    private ChatClient GirlfriendChatClient;
+    @Autowired
+    private ChatClient ComputerNetWorkChatClient;
+    @Autowired
+    private ChatClient Alibaba;
+    @Autowired
+    private ChatClient GirlfriendAIChatClient;
+    @Autowired
+    private ChatClient EnglishHomework;
+    @Autowired
+    private ChatClient DefaultChatClient;
     @RequestMapping(value = "/chat2",produces = "text/html;charset=utf-8")
     public Flux<String> chat(String prompt,String chatId) {
         chatService.saveChatId(chatId,"chat");
@@ -35,8 +47,8 @@ public class AIController {
     @RequestMapping(value = "/chat",produces = "text/html;charset=utf-8")
     public Flux<String> chatAlibaba(String prompt,String chatId) {
         chatService.saveChatId(chatId,"chat");
-        return chatClient2.prompt(AIConstant.COMPUTER)
-                .user(prompt)
+        return ComputerNetWorkChatClient.prompt()
+                .user(prompt+" /no-think ")
                 .advisors(a->a.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY,chatId))
                 .stream()
                 .content();
@@ -52,7 +64,7 @@ public class AIController {
     @RequestMapping(value = "/game",produces = "text/html;charset=utf-8")
     public Flux<String> chatGame(String prompt,String chatId) {
         //chatService.saveChatId(chatId,"chat");
-        return chatClient2.prompt(AIConstant.GIRLFRIEND)
+        return GirlfriendSadChatClient.prompt()
                 .user(prompt)
                 .advisors(a->a.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY,chatId))
                 .stream()

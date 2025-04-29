@@ -42,11 +42,11 @@ public class ChatMemoryImpl implements ChatMemory {
             sb.append(message);
         }
         stringRedisTemplate.opsForZSet().add(RedisConstant.REDIS_MEMORY_ID+conversationId,sb.toString(),start);
-        Long size=stringRedisTemplate.opsForZSet().size(RedisConstant.REDIS_MEMORY_ID+conversationId);
+        //Long size=stringRedisTemplate.opsForZSet().size(RedisConstant.REDIS_MEMORY_ID+conversationId);
         /*if(size!=null&&size>11){
             stringRedisTemplate.opsForZSet().removeRange(RedisConstant.REDIS_MEMORY_ID+conversationId,0,1);
         }*/
-        stringRedisTemplate.boundZSetOps(RedisConstant.REDIS_MEMORY_ID+conversationId).expire(12, TimeUnit.HOURS);
+        //stringRedisTemplate.boundZSetOps(RedisConstant.REDIS_MEMORY_ID+conversationId).expire(12, TimeUnit.HOURS);
     }
 
     @Override
@@ -86,7 +86,6 @@ public class ChatMemoryImpl implements ChatMemory {
                     int startIndex = s.indexOf("content='") + "content='".length();
                     // 查找 content 的结束位置
                     int endIndex = s.indexOf("'", startIndex);
-
                     if (startIndex != -1 && endIndex != -1) {
                         String content = s.substring(startIndex, endIndex);
                         messages.add(new UserMessage(content));
@@ -94,10 +93,10 @@ public class ChatMemoryImpl implements ChatMemory {
                     } else {
                         System.out.println("content not found.");
                     }
-
                 }
             }
             return messages;
+
         }
     }
 
