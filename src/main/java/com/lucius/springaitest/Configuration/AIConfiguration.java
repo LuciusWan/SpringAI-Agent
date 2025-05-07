@@ -7,6 +7,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,6 +97,34 @@ public class AIConfiguration {
     public ChatClient DefaultChatClient(OpenAiChatModel model, ChatMemory chatMemory){
         return ChatClient.builder(model)
                 .defaultSystem(AIConstant.DEFAULT)
+                .defaultAdvisors(
+                        new MessageChatMemoryAdvisor(chatMemory),
+                        new SimpleLoggerAdvisor())
+                .build();
+    }
+    @Bean
+    public ChatClient OminiChatClient(OpenAiChatModel model, ChatMemory chatMemory){
+        return ChatClient.builder(model)
+                .defaultOptions(ChatOptions.builder().model("qwen-omni-turbo-latest").build())
+                .defaultSystem(AIConstant.DEFAULT)
+                .defaultAdvisors(
+                        new MessageChatMemoryAdvisor(chatMemory),
+                        new SimpleLoggerAdvisor())
+                .build();
+    }
+    @Bean
+    public ChatClient SQLChatClient(OpenAiChatModel model, ChatMemory chatMemory){
+        return ChatClient.builder(model)
+                .defaultSystem(AIConstant.SQL_P)
+                .defaultAdvisors(
+                        new MessageChatMemoryAdvisor(chatMemory),
+                        new SimpleLoggerAdvisor())
+                .build();
+    }
+    @Bean
+    public ChatClient LearningChatClient(OpenAiChatModel model, ChatMemory chatMemory){
+        return ChatClient.builder(model)
+                .defaultSystem(AIConstant.LEARNING)
                 .defaultAdvisors(
                         new MessageChatMemoryAdvisor(chatMemory),
                         new SimpleLoggerAdvisor())
