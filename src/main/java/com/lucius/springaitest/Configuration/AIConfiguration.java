@@ -1,6 +1,7 @@
 package com.lucius.springaitest.Configuration;
 
 import com.lucius.springaitest.Constant.AIConstant;
+import com.lucius.springaitest.Tools.CodeTools;
 import com.lucius.springaitest.Tools.CourseTools;
 import com.lucius.springaitest.VO.Course;
 import org.springframework.ai.chat.client.ChatClient;
@@ -20,6 +21,8 @@ public class AIConfiguration {
     private CourseTools courseTools;
     @Autowired
     private ChatMemory chatMemory;
+    @Autowired
+    private CodeTools codeTools;
     @Bean
     public ChatClient chat(OllamaChatModel moddle) {
         return ChatClient.builder(moddle)
@@ -46,6 +49,7 @@ public class AIConfiguration {
                         new MessageChatMemoryAdvisor(chatMemory),
                         new SimpleLoggerAdvisor())
                 .defaultTools(courseTools)
+                .defaultTools(codeTools)
                 .build();
     }
     @Bean
@@ -128,6 +132,25 @@ public class AIConfiguration {
                 .defaultAdvisors(
                         new MessageChatMemoryAdvisor(chatMemory),
                         new SimpleLoggerAdvisor())
+                .build();
+    }
+    @Bean
+    public ChatClient AICoding(OpenAiChatModel model, ChatMemory chatMemory){
+        return ChatClient.builder(model)
+                .defaultSystem(AIConstant.AI_CODE)
+                .defaultAdvisors(
+                        new MessageChatMemoryAdvisor(chatMemory),
+                        new SimpleLoggerAdvisor())
+                .build();
+    }
+    @Bean
+    public ChatClient AICodingNext(OpenAiChatModel model, ChatMemory chatMemory){
+        return ChatClient.builder(model)
+                .defaultSystem(AIConstant.AI_CODE_NEXT)
+                .defaultAdvisors(
+                        new MessageChatMemoryAdvisor(chatMemory),
+                        new SimpleLoggerAdvisor())
+                .defaultTools(codeTools)
                 .build();
     }
 }

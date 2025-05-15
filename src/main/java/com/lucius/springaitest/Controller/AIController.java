@@ -10,11 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.MimeType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 @RestController
@@ -44,6 +48,12 @@ public class AIController {
     private ChatClient SQLChatClient;
     @Autowired
     private ChatClient LearningChatClient;
+    @Autowired
+    private ChatClient AICoding;
+    @Autowired
+    private ChatClient AICodingNext;
+
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     @RequestMapping(value = "/chat2",produces = "text/html;charset=utf-8")
     public Flux<String> chat(String prompt,String chatId) {
         chatService.saveChatId(chatId,"chat");
@@ -62,14 +72,14 @@ public class AIController {
                 .stream()
                 .content();
     }
-    @RequestMapping(value = "/chat",produces = "text/html;charset=utf-8")
+    @RequestMapping(value = "/chat1",produces = "text/html;charset=utf-8")
     public Flux<String> chatOmni(@RequestParam("prompt") String prompt,
                                  @RequestParam("chatId") String chatId,
                                  @RequestParam(value = "files",required = false) List<MultipartFile> files) {
         chatService.saveChatId(chatId,"chat");
         if(files==null) {
-            return LearningChatClient.prompt()
-                    .user(prompt+" /no-think ")
+            return SQLChatClient.prompt()
+                    .user(prompt)
                     .advisors(a->a.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY,chatId))
                     .stream()
                     .content();
@@ -103,5 +113,75 @@ public class AIController {
                 .advisors(a->a.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY,chatId))
                 .stream()
                 .content();
+    }
+    @RequestMapping(value = "/chat",produces = "text/html;charset=utf-8")
+    public SseEmitter  code(@RequestParam("prompt") String prompt,
+                             @RequestParam("chatId") String chatId) {
+        /*SseEmitter emitter = new SseEmitter(60_000L);
+        chatService.saveChatId(chatId,"chat");
+        return AICodingNext.prompt()
+                .user(prompt)
+                .advisors(a->a.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY,chatId))
+                .stream()
+                .content();*/
+        // 保存 chatId
+        chatService.saveChatId(chatId, "chat");
+
+        // 创建 SseEmitter，设置超时时间（例如 60 秒）
+        SseEmitter emitter = new SseEmitter(60_000L);
+
+        // 启动异步任务处理 AI 响应
+        executorService.submit(() -> {
+                // 订阅 Flux 流，逐个处理 AI 生成的代码片段
+                DefaultChatClient.prompt()
+                        .user(prompt)
+                        .advisors(a -> a.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, chatId))
+                        .stream()
+                        .content()
+                        .subscribe(
+                                // 每次收到 AI 生成的代码片段时发送 SSE 事件
+
+                                codeChunk -> {
+                                    try {
+                                        emitter.send(codeChunk);
+                                        System.out.println(codeChunk);
+                                    } catch (IOException e) {
+                                        throw new RuntimeException(e);
+                                    }
+
+                                },
+                                // 处理错误
+                                error -> {
+                                    emitter.completeWithError(error);
+                                }
+                        );
+        });
+        // 启动异步任务处理 AI 响应
+        executorService.submit(() -> {
+            // 订阅 Flux 流，逐个处理 AI 生成的代码片段
+            ComputerNetWorkChatClient.prompt()
+                    .user(prompt)
+                    .advisors(a -> a.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, chatId))
+                    .stream()
+                    .content()
+                    .subscribe(
+                            // 每次收到 AI 生成的代码片段时发送 SSE 事件
+
+                            codeChunk -> {
+                                try {
+                                    emitter.send(codeChunk);
+                                    System.out.println(codeChunk);
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+
+                            },
+                            // 处理错误
+                            error -> {
+                                emitter.completeWithError(error);
+                            }
+                    );
+        });
+        return emitter;
     }
 }
