@@ -3,11 +3,11 @@ spring:
     name: SpringAITest
   ai:
     openai:
-      base-url: https://dashscope.aliyuncs.com/compatible-mode
-      api-key: ${OPENAI_API_KEY}
+      base-url: https://api.deepseek.com
+      api-key: sk-444341dc111d46d29fd45da45ce4ef44
       chat:
         options:
-          model: qwen3-235b-a22b
+          model: deepseek-chat
       embedding:
         options:
           model: text-embedding-v3

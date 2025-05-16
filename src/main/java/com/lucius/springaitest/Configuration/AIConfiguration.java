@@ -23,6 +23,7 @@ public class AIConfiguration {
     private ChatMemory chatMemory;
     @Autowired
     private CodeTools codeTools;
+
     @Bean
     public ChatClient chat(OllamaChatModel moddle) {
         return ChatClient.builder(moddle)
@@ -31,6 +32,7 @@ public class AIConfiguration {
                         new MessageChatMemoryAdvisor(chatMemory)
                 ).build();
     }
+
     @Bean
     public ChatClient Alibaba(OpenAiChatModel moddle, ChatMemory chatMemory) {
         return ChatClient.builder(moddle)
@@ -39,6 +41,7 @@ public class AIConfiguration {
                         new MessageChatMemoryAdvisor(chatMemory)
                 ).build();
     }
+
     @Bean
     public ChatClient serviceChatClient(
             OpenAiChatModel model,
@@ -52,8 +55,9 @@ public class AIConfiguration {
                 .defaultTools(codeTools)
                 .build();
     }
+
     @Bean
-    public ChatClient GirlfriendChatClient(OpenAiChatModel model, ChatMemory chatMemory){
+    public ChatClient GirlfriendChatClient(OpenAiChatModel model, ChatMemory chatMemory) {
         return ChatClient.builder(model)
                 .defaultSystem(AIConstant.GIRL_FIREND_PROMAX)
                 .defaultAdvisors(
@@ -61,8 +65,9 @@ public class AIConfiguration {
                         new SimpleLoggerAdvisor())
                 .build();
     }
+
     @Bean
-    public ChatClient GirlfriendSadChatClient(OpenAiChatModel model, ChatMemory chatMemory){
+    public ChatClient GirlfriendSadChatClient(OpenAiChatModel model, ChatMemory chatMemory) {
         return ChatClient.builder(model)
                 .defaultSystem(AIConstant.GIRLFRIEND)
                 .defaultAdvisors(
@@ -70,8 +75,9 @@ public class AIConfiguration {
                         new SimpleLoggerAdvisor())
                 .build();
     }
+
     @Bean
-    public ChatClient ComputerNetWorkChatClient(OpenAiChatModel model, ChatMemory chatMemory){
+    public ChatClient ComputerNetWorkChatClient(OpenAiChatModel model, ChatMemory chatMemory) {
         return ChatClient.builder(model)
                 .defaultSystem(AIConstant.COMPUTER_NETWORK)
                 .defaultAdvisors(
@@ -79,8 +85,9 @@ public class AIConfiguration {
                         new SimpleLoggerAdvisor())
                 .build();
     }
+
     @Bean
-    public ChatClient GirlfriendAIChatClient(OpenAiChatModel model, ChatMemory chatMemory){
+    public ChatClient GirlfriendAIChatClient(OpenAiChatModel model, ChatMemory chatMemory) {
         return ChatClient.builder(model)
                 .defaultSystem(AIConstant.GIRL_FRIEND_AI)
                 .defaultAdvisors(
@@ -88,8 +95,9 @@ public class AIConfiguration {
                         new SimpleLoggerAdvisor())
                 .build();
     }
+
     @Bean
-    public ChatClient EnglishHomework(OpenAiChatModel model, ChatMemory chatMemory){
+    public ChatClient EnglishHomework(OpenAiChatModel model, ChatMemory chatMemory) {
         return ChatClient.builder(model)
                 .defaultSystem(AIConstant.ENGLISH_PAPER)
                 .defaultAdvisors(
@@ -97,8 +105,9 @@ public class AIConfiguration {
                         new SimpleLoggerAdvisor())
                 .build();
     }
+
     @Bean
-    public ChatClient DefaultChatClient(OpenAiChatModel model, ChatMemory chatMemory){
+    public ChatClient DefaultChatClient(OpenAiChatModel model, ChatMemory chatMemory) {
         return ChatClient.builder(model)
                 .defaultSystem(AIConstant.DEFAULT)
                 .defaultAdvisors(
@@ -106,8 +115,9 @@ public class AIConfiguration {
                         new SimpleLoggerAdvisor())
                 .build();
     }
+
     @Bean
-    public ChatClient OminiChatClient(OpenAiChatModel model, ChatMemory chatMemory){
+    public ChatClient OminiChatClient(OpenAiChatModel model, ChatMemory chatMemory) {
         return ChatClient.builder(model)
                 .defaultOptions(ChatOptions.builder().model("qwen-omni-turbo-latest").build())
                 .defaultSystem(AIConstant.DEFAULT)
@@ -116,8 +126,9 @@ public class AIConfiguration {
                         new SimpleLoggerAdvisor())
                 .build();
     }
+
     @Bean
-    public ChatClient SQLChatClient(OpenAiChatModel model, ChatMemory chatMemory){
+    public ChatClient SQLChatClient(OpenAiChatModel model, ChatMemory chatMemory) {
         return ChatClient.builder(model)
                 .defaultSystem(AIConstant.SQL_P)
                 .defaultAdvisors(
@@ -125,8 +136,9 @@ public class AIConfiguration {
                         new SimpleLoggerAdvisor())
                 .build();
     }
+
     @Bean
-    public ChatClient LearningChatClient(OpenAiChatModel model, ChatMemory chatMemory){
+    public ChatClient LearningChatClient(OpenAiChatModel model, ChatMemory chatMemory) {
         return ChatClient.builder(model)
                 .defaultSystem(AIConstant.LEARNING)
                 .defaultAdvisors(
@@ -134,8 +146,9 @@ public class AIConfiguration {
                         new SimpleLoggerAdvisor())
                 .build();
     }
+
     @Bean
-    public ChatClient AICoding(OpenAiChatModel model, ChatMemory chatMemory){
+    public ChatClient AICoding(OpenAiChatModel model, ChatMemory chatMemory) {
         return ChatClient.builder(model)
                 .defaultSystem(AIConstant.AI_CODE)
                 .defaultAdvisors(
@@ -143,14 +156,24 @@ public class AIConfiguration {
                         new SimpleLoggerAdvisor())
                 .build();
     }
+
     @Bean
-    public ChatClient AICodingNext(OpenAiChatModel model, ChatMemory chatMemory){
+    public ChatClient AICodingNext(OpenAiChatModel model, ChatMemory chatMemory) {
         return ChatClient.builder(model)
                 .defaultSystem(AIConstant.AI_CODE_NEXT)
                 .defaultAdvisors(
                         new MessageChatMemoryAdvisor(chatMemory),
                         new SimpleLoggerAdvisor())
-                .defaultTools(codeTools)
+                .build();
+    }
+
+    @Bean
+    public ChatClient DesignPattern(OpenAiChatModel model, ChatMemory chatMemory) {
+        return ChatClient.builder(model)
+                .defaultSystem(AIConstant.DESIGN_PATTERN)
+                .defaultAdvisors(
+                        new MessageChatMemoryAdvisor(chatMemory),
+                        new SimpleLoggerAdvisor())
                 .build();
     }
 }
