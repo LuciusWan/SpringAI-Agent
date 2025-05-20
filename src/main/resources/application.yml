@@ -3,8 +3,8 @@ spring:
     name: SpringAITest
   ai:
     openai:
-      base-url: https://api.deepseek.com
-      api-key: ${OPEN_AI_KEYS}
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      api-key: sk-f05ef9cd88fd436ea4be2b2e3edae7f4
       chat:
         options:
           model: deepseek-chat
@@ -25,6 +25,11 @@ spring:
         request-timeout: 20s
         type: async
         root-change-notification: true
+    vectorstore:
+      redis:
+        initialize-schema: true
+        prefix: "doc:"
+        index-name: spring_ai_index
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/hmdp?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true

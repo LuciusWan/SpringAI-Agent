@@ -8,11 +8,20 @@ import com.lucius.springaitest.Constant.AIConstant;
 import com.lucius.springaitest.Service.ChatService;
 import com.lucius.springaitest.VO.MessageVO;
 import jakarta.annotation.Resource;
+import org.apache.tomcat.util.file.ConfigurationSource;
 import org.json.JSONObject;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
 import org.springframework.ai.content.Media;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.openai.OpenAiEmbeddingModel;
+import org.springframework.ai.reader.ExtractedTextFormatter;
+import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
+import org.springframework.ai.reader.pdf.config.PdfDocumentReaderConfig;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.MimeType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -63,6 +72,10 @@ public class AIController {
     private ChatClient AICodingNext;
     @Autowired
     private ChatClient DesignPattern;
+    @Autowired
+    private VectorStore vectorStore;
+    @Autowired
+    private OpenAiEmbeddingModel embeddingModel;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @RequestMapping(value = "/chat2", produces = "text/event-stream")
@@ -371,5 +384,32 @@ public class AIController {
         } catch (IOException e) {
             System.err.println("写入文件时发生错误: ");
         }
+    }
+
+    @GetMapping("/test")
+    public String test() {
+        org.springframework.core.io.Resource resource = new FileSystemResource("C:\\Users\\86180\\Desktop\\4 计算机网络名词解释 (2).pdf");
+        // 1. 创建PDF的读取器
+        PagePdfDocumentReader reader = new PagePdfDocumentReader(
+                resource, // 文件源
+                PdfDocumentReaderConfig.builder()
+                        .withPageExtractedTextFormatter(ExtractedTextFormatter.defaults())
+                        .withPagesPerDocument(1) // 每页PDF作为一个Document
+                        .build()
+        );
+        // 2. 读取PDF文档，拆分为Document
+        List<Document> documents = reader.read();
+        // 3. 写入向量库
+        vectorStore.add(documents);
+        // 4. 搜索
+        documents = vectorStore.similaritySearch("DNS来获得主机别名对应的规范主机名及主机IP地址");
+        if (documents != null) {
+            for (Document document : documents) {
+                System.out.println(document.getId());
+                System.out.println(document.getScore());
+                System.out.println(document.getText());
+            }
+        }
+        return "success";
     }
 }

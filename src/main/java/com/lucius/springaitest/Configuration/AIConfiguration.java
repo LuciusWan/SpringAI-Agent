@@ -11,6 +11,9 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiEmbeddingModel;
+import org.springframework.ai.vectorstore.SimpleVectorStore;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -175,5 +178,10 @@ public class AIConfiguration {
                         new MessageChatMemoryAdvisor(chatMemory),
                         new SimpleLoggerAdvisor())
                 .build();
+    }
+
+    @Bean
+    public VectorStore vectorStore(OpenAiEmbeddingModel embeddingModel) {
+        return SimpleVectorStore.builder(embeddingModel).build();
     }
 }
