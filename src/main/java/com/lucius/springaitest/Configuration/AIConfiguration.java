@@ -9,14 +9,20 @@ import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.prompt.ChatOptions;
+import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.embedding.TokenCountBatchingStrategy;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.vectorstore.redis.RedisVectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPooled;
 
 @Component
 public class AIConfiguration {
@@ -26,6 +32,10 @@ public class AIConfiguration {
     private ChatMemory chatMemory;
     @Autowired
     private CodeTools codeTools;
+    @Autowired
+    private JedisPooled jedisPooled;
+    @Autowired
+    private OpenAiEmbeddingModel openAiEmbeddingModel;
 
     @Bean
     public ChatClient chat(OllamaChatModel moddle) {
@@ -181,7 +191,21 @@ public class AIConfiguration {
     }
 
     @Bean
-    public VectorStore vectorStore(OpenAiEmbeddingModel embeddingModel) {
+    public VectorStore simpleVectorStore(OpenAiEmbeddingModel embeddingModel) {
         return SimpleVectorStore.builder(embeddingModel).build();
+    }
+
+    @Bean
+    public VectorStore redisVectorStore() {
+        return RedisVectorStore.builder(jedisPooled, openAiEmbeddingModel)
+                .indexName("custom-index")                // 可选：默认 spring-ai-index
+                .prefix("custom-prefix")                  // 可选：默认 embedding:
+                .metadataFields(                         // 定义元数据字段
+                        RedisVectorStore.MetadataField.tag("country"),
+                        RedisVectorStore.MetadataField.numeric("year"))
+                .initializeSchema(true)                   // 是否初始化索引
+                .batchingStrategy(new TokenCountBatchingStrategy()) // 可选：默认 TokenCountBatchingStrategy
+                .build();
+
     }
 }

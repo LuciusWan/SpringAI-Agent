@@ -4,29 +4,28 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.lucius.springaitest.Configuration.MyPagePdfDocumentReader;
 import com.lucius.springaitest.Constant.AIConstant;
 import com.lucius.springaitest.Service.ChatService;
 import com.lucius.springaitest.VO.MessageVO;
 import jakarta.annotation.Resource;
-import org.apache.tomcat.util.file.ConfigurationSource;
 import org.json.JSONObject;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor;
 import org.springframework.ai.content.Media;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.ai.reader.ExtractedTextFormatter;
 import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
 import org.springframework.ai.reader.pdf.config.PdfDocumentReaderConfig;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.MimeType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
+import redis.clients.jedis.JedisPooled;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -73,9 +72,13 @@ public class AIController {
     @Autowired
     private ChatClient DesignPattern;
     @Autowired
-    private VectorStore vectorStore;
+    private VectorStore simpleVectorStore;
     @Autowired
-    private OpenAiEmbeddingModel embeddingModel;
+    private VectorStore redisVectorStore;
+    @Autowired
+    private MyPagePdfDocumentReader myPagePdfDocumentReader;
+    @Autowired
+    private JedisPooled jedisPooled;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @RequestMapping(value = "/chat2", produces = "text/event-stream")
@@ -386,9 +389,9 @@ public class AIController {
         }
     }
 
-    @GetMapping("/test")
-    public String test() {
-        org.springframework.core.io.Resource resource = new FileSystemResource("C:\\Users\\86180\\Desktop\\4 计算机网络名词解释 (2).pdf");
+    @GetMapping("/test/{question}")
+    public String test(@PathVariable String question) {
+        org.springframework.core.io.Resource resource = new FileSystemResource("D:\\SpringBootProjects\\SpringAIAlibaba\\SpringAITest\\src\\main\\resources\\PDF_Sourse\\2025春概论知识要点.pdf");
         // 1. 创建PDF的读取器
         PagePdfDocumentReader reader = new PagePdfDocumentReader(
                 resource, // 文件源
@@ -399,17 +402,22 @@ public class AIController {
         );
         // 2. 读取PDF文档，拆分为Document
         List<Document> documents = reader.read();
+        //List<Document> documents2 = myPagePdfDocumentReader.getDocsFromPdfWithCatalog();
         // 3. 写入向量库
-        vectorStore.add(documents);
+        redisVectorStore.add(documents);
+        //redisVectorStore.add(documents2);
         // 4. 搜索
-        documents = vectorStore.similaritySearch("DNS来获得主机别名对应的规范主机名及主机IP地址");
-        if (documents != null) {
+        documents = redisVectorStore.similaritySearch(question);
+        /*if (documents != null) {
             for (Document document : documents) {
                 System.out.println(document.getId());
                 System.out.println(document.getScore());
                 System.out.println(document.getText());
             }
+        }*/
+        if (documents != null) {
+            return documents.toString();
         }
-        return "success";
+        return null;
     }
 }
